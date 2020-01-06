@@ -1,130 +1,181 @@
 require('babel-register')
 const {success, error} = require('functions')
+const mysql = require('mysql')
 const bodyParser = require('body-parser')
 const express = require('express')
 const app = express()
 const morgan = require('morgan')
 const config = require('./config')
 
-const members = [
-    {
-        id: 1,
-        name: 'Flo'
-    },
-    {
-        id: 2,
-        name: 'Guigui'
-    },
-    {
-        id: 3,
-        name: 'FloLys'
-    }
-]
-let MembersRouter = express.Router()
+const db = mysql.createConnection({
+    host: 'localhost',
+    database: 'backendproject',
+    user: 'root',
+    password: ''
+})
 
-app.use(morgan('dev'))
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended : true }));
+db.connect((err) => {
+    if(err){
+        console.log(err.message)
+    } else {
 
-MembersRouter.route('/:id')
+        console.log('Connected.')
 
-    // Récupère un membre avec son ID
-    .get((req, res) => {
+        const app = express()
 
-        let index = getIndex(req.params.id);
+        let MembersRouter = express.Router()
 
-        if(typeof(index) == 'string') {
-            res.json(error(index))
-        } else {
-            res.json(success(members[index]))
-        }
-    })
+        app.use(morgan('dev'))
+        app.use(bodyParser.json());
+        app.use(bodyParser.urlencoded({ extended : true }));
 
-    // Modifie un membre avec son ID
-    .put((req, res) => {
+        MembersRouter.route('/:id')
 
-        let index = getIndex(req.params.id);
+            // Récupère un membre avec son ID
+            .get((req, res) => {
 
-        if(typeof(index) == 'string') {
-            res.json(error(index))
-        } else {
-            let same = false
+                db.query('SELECT * FROM members WHERE id = ?', [req.params.id], (err, result) => {
+                    if(err) {
+                        res.json(error(err.message))
+                    }else{
 
-            for (let i = 0; i < members.length; i++) {
-                if(req.body.name == members[i].name && req.params.id != members[i].id) {
-                    same = true
-                    break
-                }
-            }
-            
-            if (same) {
-                res.json(error('same name'))
-            } else {
-                members[index].name = req.body.name
-                res.json(success(true))
-            }
-        }
-    })
+                        if(result[0] != undefined){
+                            res.json(success(result[0]))
+                        } else {
+                            res.json(error('Wrong id'))
+                        }
+                        
+                    }
+                })
+            })
 
-    // Suprime un membre avec son ID
-    .delete ((req, res) => {
+            // Modifie un membre avec son ID
+            .put((req, res) => {
 
-        let index = getIndex(req.params.id);
+                if(req.body.mail) {
 
-        if (typeof(index) == 'string') {
-            res.json(error(index))
-        } else {
-
-            members.splice(index, 1)
-            res.json(success(members))
-
-        }
-    })
+                    db.query('SELECT * FROM members WHERE id = ?', [req.params.id], (err, result) => {
+                        if(err) {
+                            res.json(error(err.message))
+                        }else{
     
-MembersRouter.route('/')
+                            if(result[0] != undefined){
+                                
+                                db.query('SELECT * FROM members WHERE mail = ? AND id != ?', [req.body.mail,req.params.id], (err, result) => {
+                                    if(err) {
+                                        res.json(error(err.message))
+                                    } else {
+                                        if(result[0] != undefined) {
+                                            res.json(error('same mail'))
+                                        } else {
 
-    // Récupère tous les membres
-    .get((req, res) => {
-        if(req.query.max != undefined && req.query.max > 0) {
-            res.json(success(members.slice(0, req.query.max)))
-        }else if(req.query.max != undefined){
-            res.json(error('Wrong max value'))
-        }else{
-            res.json(success(members)) 
-        }
-    })
+                                            db.query('UPDATE members SET firstname = ?, lastname = ?, age = ?, mail = ? where id = ?', [req.body.firstname, req.body.lastname, req.body.age, req.body.mail, req.params.id], (err, result) => {
+                                                if(err) {
+                                                    res.json(error(err.message))
+                                                } else {
+                                                    res.json(success(true))
+                                                }
+                                            })
+                                        }
+                                    }
+                                })
+                            } else {
+                                res.json(error('Wrong id'))
+                            }
+                        }
+                    })
+                } else {
+                    res.json(error('no name value'))
+                }
+            })
 
-    // Ajoute un membre
-    .post((req, res) => {
-        if(req.body.name) {
+            // Suprime un membre avec son ID
+            .delete ((req, res) => {
 
-                let sameName = false
+                let index = getIndex(req.params.id);
+
+                if (typeof(index) == 'string') {
+                    res.json(error(index))
+                } else {
+
+                    members.splice(index, 1)
+                    res.json(success(members))
+
+                }
+            })
             
-                for (let i = 0; i < members.length; i++) {
-                    if (members[i].name == req.body.name) {
-                        sameName = true
-                        break
-                    }
-                }
-                if(sameName) {
-                    res.json(error('name already taken'))
+        MembersRouter.route('/')
+
+            // Récupère tous les membres
+            .get((req, res) => {
+                if(req.query.max != undefined && req.query.max > 0) {
+
+                    db.query('SELECT * FROM members LIMIT 0, ?', [req.query.max], (err, result) => {
+                        if(err) {
+                            res.json(error(err.message))
+                        } else {
+                            res.json(success(result))
+                        }
+                            
+                    })
+                }else if(req.query.max != undefined){
+                    res.json(error('Wrong max value'))
                 }else{
-                    let member = {
-                        id: createID(),
-                        name: req.body.name
-                    }
-                    members.push(member)
-                    res.json(success(member))
+                    db.query('SELECT * FROM members', (err, result) => {
+                        if(err) {
+                            res.json(error(err.message))
+                        } else {
+                            res.json(success(result))
+                        }
+                            
+                    })
+                    res.json(success(members[0].firstname)) 
                 }
+            })
 
-        }else{
-            res.json(error('no name value'))
-        }
-    })
+            // Ajoute un membre
+            .post((req, res) => {
+                if(req.body.mail) {
 
-app.use(config.rootAPI+'members', MembersRouter)
+                    db.query('SELECT * FROM members WHERE mail = ?', [req.body.mail], (err, result) => {
+                        if(err) {
+                            res.json(error(err.message))
+                        } else {
+                            if (result[0] != undefined) {
+                                res.json(error('Wrong mail'))
+                            } else {
+                                db.query('INSERT INTO members(firstname, lastname, age, mail) VALUES(?, ?, ?, ?)', [req.body.firstname, req.body.lastname, req.body.age, req.body.mail], (err, result) => {
+                                    if(err) {
+                                        res.json(error(err.message))
+                                    } else {
+                                        db.query('SELECT * FROM members WHERE mail = ?', [req.body.mail], (err, result) => {
+                                            if(err) {
+                                                res.json(error(err.message))
+                                            } else {
+                                                res.json(success({
+                                                    id: result[0].id,
+                                                    firstname: result[0].firstname,
+                                                    lastname: result[0].lastname,
+                                                    age: result[0].age,
+                                                    mail: result[0].mail
+                                                }))
+                                            }
+                                        })
+                                    }
+                                })
+                            }
+                        }
+                    })
+                }else{
+                    res.json(error('no name value'))
+                }
+            })
 
-app.listen(config.port, () => console.log('Started on port '+config.port))
+        app.use(config.rootAPI+'members', MembersRouter)
+
+        app.listen(config.port, () => console.log('Started on port '+config.port))
+    }
+})
 
 function getIndex(id) {
     for (let i = 0; i < members.length; i++) {
