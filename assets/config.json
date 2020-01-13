@@ -1,0 +1,19 @@
+{
+    "rootAPI": "/api/V1/",
+    "port": 8080,
+    "db": {
+        "host": "localhost",
+        "database": "backendproject",
+        "user": "root",
+        "password": ""
+    },
+    "errors" : {
+        "wrongID": "wrong id",
+        "wrongMaxValue": "wrong max value",
+        "Wrongmail": "wrong mail",
+        "noNameValue": "no name value",
+        "sameName": "same name"
+        
+        
+    }
+}
