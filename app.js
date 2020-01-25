@@ -4,6 +4,8 @@ const mysql = require('promise-mysql')
 const bodyParser = require('body-parser')
 const express = require('express')
 const app = express()
+const swaggerUi = require('swagger-ui-express')
+const swaggerDocument = require('./assets/swagger.json')
 const morgan = require('morgan')('dev')
 const config = require('./assets/config')
 
@@ -15,56 +17,57 @@ const db = mysql.createConnection({
 }).then((db) => {
     console.log('Connected.')
 
-        const app = express()
+    const app = express()
 
-        let MembersRouter = express.Router()
-        let Members = require('./assets/classes/members-class')(db, config)
+    let MembersRouter = express.Router()
+    let Members = require('./assets/classes/members-class')(db, config)
 
-        app.use(morgan)
-        app.use(bodyParser.json());
-        app.use(bodyParser.urlencoded({ extended : true }));
+    app.use(morgan)
+    app.use(bodyParser.json());
+    app.use(bodyParser.urlencoded({ extended : true }));
+    app.use(config.rootAPI+'api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-        MembersRouter.route('/:id')
+    MembersRouter.route('/:id')
 
-            // Récupère un membre avec son ID
-            .get(async (req, res) => {
-                let member = await Members.getById(req.params.id)
-                res.json(checkAndChange(member))
-            })
+        // Récupère un membre avec son ID
+        .get(async (req, res) => {
+            let member = await Members.getById(req.params.id)
+            res.json(checkAndChange(member))
+        })
 
-            // Modifie un membre avec son ID
-            .put(async (req, res) => {
+        // Modifie un membre avec son ID
+        .put(async (req, res) => {
 
-                let updateMember = await Members.update(req.params.id, req.body.firstname, req.body.lastname, req.body.age, req.body.mail)
-                res.json(checkAndChange(updateMember))
-                
-            })
+            let updateMember = await Members.update(req.params.id, req.body.firstname, req.body.lastname, req.body.age, req.body.mail)
+            res.json(checkAndChange(updateMember))
 
-            // Suprime un membre avec son ID
-            .delete (async (req, res) => {
+        })
 
-                let deleteMember = await Members.delete(req.params.id)
-                res.json(checkAndChange(deleteMember))
-            })
-            
-        MembersRouter.route('/')
+        // Suprime un membre avec son ID
+        .delete (async (req, res) => {
 
-            // Récupère tous les membres
-            .get(async (req, res) => {
-                let allMembers = await Members.getAll(req.query.max)
-                res.json(checkAndChange(allMembers))
-                
-            })
+            let deleteMember = await Members.delete(req.params.id)
+            res.json(checkAndChange(deleteMember))
+        })
 
-            // Ajoute un membre
-            .post(async (req, res) => {
-                let addMember = await Members.add(req.body.firstname, req.body.lastname, req.body.age, req.body.mail)
-                res.json(checkAndChange(addMember))
-            })
+    MembersRouter.route('/')
 
-        app.use(config.rootAPI+'members', MembersRouter)
+        // Récupère tous les membres
+        .get(async (req, res) => {
+            let allMembers = await Members.getAll(req.query.max)
+            res.json(checkAndChange(allMembers))
 
-        app.listen(config.port, () => console.log('Started on port '+config.port))
+        })
+
+        // Ajoute un membre
+        .post(async (req, res) => {
+            let addMember = await Members.add(req.body.firstname, req.body.lastname, req.body.age, req.body.mail)
+            res.json(checkAndChange(addMember))
+        })
+
+    app.use(config.rootAPI+'members', MembersRouter)
+
+    app.listen(config.port, () => console.log('Started on port '+config.port))
 }).catch((err) => {
     console.log('Error during database connection')
     console.log(err.message)
