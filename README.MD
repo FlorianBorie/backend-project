@@ -1,8 +1,13 @@
-## Projet de Backend Théo Charron et Florian Borie -Ingésup B3C
+## Projet API-REST node JS Gestion de membres
 
-Lien de la doc gitbook : https://api-rest-backend-project.gitbook.io/api-rest-backend-project/
 
 Pour bien commencer
-```bash
+
+```node
 npm install
 ```
+## Documentation
+[API DOCUMENTATION ON GITBOOK](https://api-rest-backend-project.gitbook.io/api-rest-backend-project/)
+
+## Contributeurs
+[Florian Borie](https://github.com/Borixx33) & [Théo Charron](https://github.com/TheoCharron)
