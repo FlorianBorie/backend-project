@@ -1,5 +1,9 @@
 ## Projet API-REST node JS Gestion de membres
 
+Ce projet est une API-REST permettant de voir un ou tous les membre, d'ajouter un membre, 
+de le modifier ou encore de le supprimer
+
+
 
 Pour bien commencer
 
