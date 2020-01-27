@@ -1,4 +1,4 @@
-let db, confnig
+let db, config
 
 module.exports = (_db, _config) => {
     db = _db
