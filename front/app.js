@@ -75,7 +75,7 @@ app.get('/insert', (req, res) => {
 
 // Méthode permettant d'ajouter un membre
 app.post('/insert', (req, res) => {
-    apiCall('/members', 'post', {name: req.body.name}, res, () => {
+    apiCall('/members', 'post', {firstname: req.body.firstname,lastname: req.body.lastname,age: req.body.age,mail: req.body.mail}, res, () => {
         res.redirect('/members')
     })
 })

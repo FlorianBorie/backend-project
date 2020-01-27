@@ -21,12 +21,12 @@
             <input type="text" class="form-control" id="{{ index }}" name="{{ index }}" value="{{ value }}" {% if index == 'id' %} readonly {%  endif %}>
         </div>
     {% endfor %}
-    <button type="submit" class="btn btn-primary">Modifier</button>
+    <button type="submit" class="btn btn-success">Modifier</button>
 </form>
 
 <form action="/delete" method="post" class="mt-5">
     <input type="hidden" name="id" value="{{ member.id }}">
-    <button type="submit" class="btn btn-primary">Supprimer</button>
+    <button type="submit" class="btn btn-danger">Supprimer</button>
 </form>
 
 <a href="/" class="btn btn-primary mt-3">Accueil</a>
