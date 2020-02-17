@@ -31,6 +31,21 @@ const db = mysql
 
     MembersRouter.route("/:id")
 
+      //login-test
+      .post(async (req, res) => {
+        const user = {
+          id: 1,
+          username: "jon",
+          email: "jon@gmail.com"
+        };
+
+        jwt.sign({ user }, "secretkey", (err, token) => {
+          res.json({
+            token
+          });
+        });
+      })
+
       // Récupère un membre avec son ID
       .get(async (req, res) => {
         let member = await Members.getById(req.params.id);
