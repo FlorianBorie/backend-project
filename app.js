@@ -7,6 +7,7 @@ const expressOasGenerator = require("express-oas-generator");
 const app = express();
 const morgan = require("morgan")("dev");
 const config = require("./assets/config");
+const bcrypt = require("bcrypt");
 const passport = require("./assets/passport");
 
 const db = mysql
