@@ -11,6 +11,7 @@ const bcrypt = require("bcrypt");
 const passportFile = require("./assets/passport");
 const passport = require("passport");
 const db = mysql
+
   .createConnection({
     host: config.db.host,
     database: config.db.database,

@@ -3,11 +3,12 @@ const LocalStrategy = require("passport-local").Strategy;
 const mysql = require("mysql");
 const connection = mysql.createConnection({
   host: "localhost",
+  database: "backendproject",
   user: "root",
   password: ""
 });
 
-connection.query("USE vidyawxx_build2");
+// connection.query("backendproject");
 
 // expose this function to our app using module.exports
 module.exports = function(passport) {
