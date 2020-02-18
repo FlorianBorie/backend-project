@@ -8,7 +8,6 @@ const app = express();
 const morgan = require("morgan")("dev");
 const config = require("./assets/config");
 const bcrypt = require("bcrypt");
-const passportFile = require("./assets/passport");
 const passport = require("passport");
 const db = mysql
 
